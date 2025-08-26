@@ -27,7 +27,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   getUserById(@Param('id') id: string) {
-    return this.usersService.getUserById(Number(id));
+    return this.usersService.getUserById(id);
   }
 
   @HttpCode(HttpStatus.CREATED)
@@ -39,14 +39,12 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Put(':id')
   updateUserById(@Param('id') id: string, @Body() updateUser: User) {
-    this.usersService.updateUserById(Number(id), updateUser);
-    return `El usuario con id ${id} ha sido atualizado con exito`;
+    return this.usersService.updateUserById(id, updateUser);
   }
 
   @HttpCode(HttpStatus.OK)
   @Delete(':id')
   deleteUserById(@Param('id') id: string) {
-    this.usersService.deleteUserById(Number(id));
-    return `El usuario con id ${id} ha sido eliminado con exito`;
+    return this.usersService.deleteUserById(id);
   }
 }

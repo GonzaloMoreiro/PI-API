@@ -9,19 +9,19 @@ export class ProductsService {
     return this.productsRepository.getProducts();
   }
 
-  getProductById(id: number) {
+  getProductById(id: string) {
     return this.productsRepository.getById(id);
   }
 
-  createProduct(product: Omit<Product, 'id'>): Promise<Product> {
-    return this.productsRepository.createProduct(product);
+  createProduct(newProduct: Product): string {
+    return this.productsRepository.createProduct(newProduct);
   }
 
-  updateProductById(id: number, product: Omit<Product, 'id'>) {
-    return this.productsRepository.updateById(id, product);
+  updateProductById(id: string, updateProduct: Product) {
+    return this.productsRepository.updateById(id, updateProduct);
   }
 
-  deleteProductById(id: number) {
+  deleteProductById(id: string) {
     return this.productsRepository.deleteById(id);
   }
 }

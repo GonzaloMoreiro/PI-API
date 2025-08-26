@@ -25,7 +25,7 @@ export class ProductsControler {
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   getProductById(@Param('id') id: string) {
-    return this.productsService.getProductById(Number(id));
+    return this.productsService.getProductById(id);
   }
 
   @HttpCode(HttpStatus.CREATED)
@@ -37,14 +37,12 @@ export class ProductsControler {
   @HttpCode(HttpStatus.OK)
   @Put(':id')
   updateUserById(@Param('id') id: string, @Body() updateProduct: Product) {
-    this.productsService.updateProductById(Number(id), updateProduct);
-    return `El usuario con id ${id} ha sido actualizado con exito`;
+    return this.productsService.updateProductById(id, updateProduct);
   }
 
   @HttpCode(HttpStatus.OK)
   @Delete(':id')
   deleteUserById(@Param('id') id: string) {
-    this.productsService.deleteProductById(Number(id));
-    return `El usuario con id ${id} ha sido eliminado con exito`;
+    return this.productsService.deleteProductById(id);
   }
 }
