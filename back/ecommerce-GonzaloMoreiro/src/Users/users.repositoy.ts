@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { User } from './user.interface';
+import { User } from './user.entity';
 
 @Injectable()
 export class UsersRepository {
   private users: User[] = [
     {
-      id: 1,
+      id: '1',
       email: 'gonzalo@gmail.com',
       name: 'Gonzalo',
       password: '3123124123fas',
@@ -15,7 +15,7 @@ export class UsersRepository {
       city: 'Rufino',
     },
     {
-      id: 2,
+      id: '2',
       email: 'mario@gmail.com',
       name: 'Mario',
       password: 'gasdasdasd',
@@ -25,7 +25,7 @@ export class UsersRepository {
       city: 'Ibiza',
     },
     {
-      id: 3,
+      id: '3',
       email: 'hector@gmail.com',
       name: 'Hector',
       password: 'sdgsdbsdbsf',
@@ -35,7 +35,7 @@ export class UsersRepository {
       city: 'Brasilia',
     },
     {
-      id: 4,
+      id: '4',
       email: 'nanci@gmail.com',
       name: 'Nanci',
       password: '4123124',
@@ -46,22 +46,23 @@ export class UsersRepository {
     },
   ];
 
-  async getUsers() {
-    return this.users.map(({ password, ...sinPass }) => sinPass);
+  getUsers() {
+    return this.users;
   }
 
-  async getById(id: number) {
-    const sinPass = this.users.map(({ password, ...sinPass }) => sinPass);
-    return sinPass.find((users) => users.id === id);
+  getById(id: string): User | undefined {
+    const userFound = this.users.find((users) => users.id === id);
+    return userFound;
   }
 
-  async createUser(user: Omit<User, 'id'>) {
+  createUser(newUser: User): string {
     const id = this.users.length + 1;
-    this.users.push({ id, ...user });
-    return { id, ...user };
+    newUser.id = id.toString();
+    this.users.push(newUser);
+    return `Usuario ${newUser.id} creado correctamente`;
   }
 
-  async updateById(id: number, user: Omit<User, 'id'>) {
+  updateById(id: string, user: Omit<User, 'id'>): string | undefined {
     const userFind = this.users.find((users) => users.id === id);
     if (userFind) {
       userFind.address = user.address;
@@ -71,12 +72,14 @@ export class UsersRepository {
       userFind.name = user.name;
       userFind.password = user.password;
       userFind.phone = user.phone;
+    } else {
+      return undefined;
     }
-    return id;
+    return `Usuario ${userFind.id} actualizado correctamente`;
   }
 
-  async deleteById(id: number) {
+  deleteById(id: string): string {
     this.users = this.users.filter((users) => users.id !== id);
-    return id;
+    return `Usuario ${id} eliminado correctamente`;
   }
 }

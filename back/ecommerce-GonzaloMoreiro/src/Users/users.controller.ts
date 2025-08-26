@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -11,46 +12,41 @@ import {
 } from '@nestjs/common';
 
 import { UsersService } from './users.service';
-import { User } from './user.interface';
+import { User } from './user.entity';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Get()
   getUsers(@Query('limit') limit = 5, @Query('page') page = 1) {
-    const users = this.usersService.getUsers();
-    console.log(`users limit => ${limit} page => ${page}`);
-
-    return users;
+    return this.usersService.getUsers();
   }
 
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Get(':id')
   getUserById(@Param('id') id: string) {
-    const userFound = this.usersService.getUserById(Number(id));
-    return userFound;
+    return this.usersService.getUserById(Number(id));
   }
 
-  @HttpCode(201)
+  @HttpCode(HttpStatus.CREATED)
   @Post()
-  createUser(@Body() user: User) {
-    const data = this.usersService.createUser(user);
-    return data;
+  createUser(@Body() newUser: User) {
+    return this.usersService.createUser(newUser);
   }
 
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Put(':id')
-  updateUserById(@Param('id') id: string, @Body() user: User) {
-    const userUpdate = this.usersService.updateUserById(Number(id), user);
+  updateUserById(@Param('id') id: string, @Body() updateUser: User) {
+    this.usersService.updateUserById(Number(id), updateUser);
     return `El usuario con id ${id} ha sido atualizado con exito`;
   }
 
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Delete(':id')
   deleteUserById(@Param('id') id: string) {
-    const userDelete = this.usersService.deleteUserById(Number(id));
+    this.usersService.deleteUserById(Number(id));
     return `El usuario con id ${id} ha sido eliminado con exito`;
   }
 }

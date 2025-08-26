@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Product } from './product.interface';
+import { Product } from './product.entity';
 
 @Injectable()
 export class ProductsRepository {
   private products: Product[] = [
     {
-      id: 1,
+      id: '1',
       name: 'Licuadora',
       description: '220v, 1000W',
       price: 500,
@@ -13,7 +13,7 @@ export class ProductsRepository {
       imgUrl: 'ffasdasd',
     },
     {
-      id: 2,
+      id: '2',
       name: 'TV',
       description: 'Full HD 4k',
       price: 300,
@@ -21,7 +21,7 @@ export class ProductsRepository {
       imgUrl: 'fasfdasasd',
     },
     {
-      id: 3,
+      id: '3',
       name: 'Placard',
       description: 'Tamano 200cmx150cmx70cm',
       price: 400,
@@ -29,7 +29,7 @@ export class ProductsRepository {
       imgUrl: 'gasdasd',
     },
     {
-      id: 4,
+      id: '4',
       name: 'Mochila',
       description: 'Capacidad 20 Litros',
       price: 50,
@@ -38,34 +38,36 @@ export class ProductsRepository {
     },
   ];
 
-  async getProducts() {
+  getProducts() {
     return this.products;
   }
 
-  async getById(id: number) {
+  getById(id: string) {
     return this.products.find((product) => product.id === id);
   }
 
-  async createProduct(product: Omit<Product, 'id'>) {
+  createProduct(newProduct: Product): string {
     const id = this.products.length + 1;
-    this.products.push({ id, ...product });
-    return { id, ...product };
+    newProduct.id = id.toString();
+    this.products.push(newProduct);
+    return `Producto ${newProduct.id} creado correctamente`;
   }
 
-  async updateById(id: number, product: Omit<Product, 'id'>) {
+  updateById(id: string, updateProduct: Product): string | undefined {
     const productFind = this.products.find((products) => products.id === id);
     if (productFind) {
-      productFind.description = product.description;
-      productFind.imgUrl = product.imgUrl;
-      productFind.name = product.name;
-      productFind.price = product.price;
-      productFind.stock = product.stock;
+      productFind.description = updateProduct.description;
+      productFind.imgUrl = updateProduct.imgUrl;
+      productFind.name = updateProduct.name;
+      productFind.price = updateProduct.price;
+      productFind.stock = updateProduct.stock;
+      return `Producto ${id} actualizado correctamente`;
     }
-    return id;
+    return undefined;
   }
 
-  async deleteById(id: number) {
+  deleteById(id: string) {
     this.products = this.products.filter((products) => products.id !== id);
-    return id;
+    return `Producto ${id} eliminado correctamente`;
   }
 }
