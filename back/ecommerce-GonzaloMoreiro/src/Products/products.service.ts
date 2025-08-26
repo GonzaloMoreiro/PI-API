@@ -5,11 +5,11 @@ import { Product } from './product.entity';
 @Injectable()
 export class ProductsService {
   constructor(private productsRepository: ProductsRepository) {}
-  getProducts() {
+  getProducts(): Product[] {
     return this.productsRepository.getProducts();
   }
 
-  getProductById(id: string) {
+  getProductById(id: string): Product | undefined {
     return this.productsRepository.getById(id);
   }
 
@@ -17,11 +17,11 @@ export class ProductsService {
     return this.productsRepository.createProduct(newProduct);
   }
 
-  updateProductById(id: string, updateProduct: Product) {
+  updateProductById(id: string, updateProduct: Product): string | undefined {
     return this.productsRepository.updateById(id, updateProduct);
   }
 
-  deleteProductById(id: string) {
+  deleteProductById(id: string): string {
     return this.productsRepository.deleteById(id);
   }
 }

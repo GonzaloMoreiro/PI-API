@@ -5,23 +5,30 @@ import { User } from './user.entity';
 @Injectable()
 export class UsersService {
   constructor(private usersRepository: UsersRepository) {}
-  getUsers() {
-    return this.usersRepository.getUsers();
+
+  getUsers(): Omit<User, 'password'>[] {
+    return this.usersRepository.getUsers().map(({ password, ...rest }) => rest);
   }
 
-  getUserById(id: string) {
-    return this.usersRepository.getById(id);
+  getUserById(id: string): Omit<User, 'password'> | undefined {
+    const userFound = this.usersRepository.getById(id);
+    if (userFound) {
+      const { password, ...rest } = userFound;
+      return rest;
+    } else {
+      return undefined;
+    }
   }
 
   createUser(newUser: User): string {
     return this.usersRepository.createUser(newUser);
   }
 
-  updateUserById(id: string, user: Omit<User, 'id'>) {
-    return this.usersRepository.updateById(id, user);
+  updateUserById(id: string, updateUser): string | undefined {
+    return this.usersRepository.updateById(id, updateUser);
   }
 
-  deleteUserById(id: string) {
+  deleteUserById(id: string): string {
     return this.usersRepository.deleteById(id);
   }
 }
