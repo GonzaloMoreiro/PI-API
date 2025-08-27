@@ -46,12 +46,18 @@ export class UsersRepository {
     },
   ];
 
-  getUsers() {
-    return this.users;
+  getUsers(page: number = 1, limit: number = 5): User[] {
+    const startIndex = (page - 1) * limit;
+    return this.users.slice(startIndex, startIndex + limit);
   }
 
   getById(id: string): User | undefined {
     const userFound = this.users.find((users) => users.id === id);
+    return userFound;
+  }
+
+  getByEmail(email: string): User | undefined {
+    const userFound = this.users.find((users) => users.email === email);
     return userFound;
   }
 

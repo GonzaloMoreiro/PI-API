@@ -8,9 +8,11 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { Product } from './product.entity';
+import { validateProduct } from 'src/utils/validate';
 
 @Controller('products')
 export class ProductsControler {
@@ -18,8 +20,8 @@ export class ProductsControler {
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  getProducts() {
-    return this.productsService.getProducts();
+  getProducts(@Query('limit') limit = 5, @Query('page') page = 1) {
+    return this.productsService.getProducts(page, limit);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -31,13 +33,21 @@ export class ProductsControler {
   @HttpCode(HttpStatus.CREATED)
   @Post()
   createProduct(@Body() newProduct: Product) {
-    return this.productsService.createProduct(newProduct);
+    if (validateProduct(newProduct)) {
+      return this.productsService.createProduct(newProduct);
+    } else {
+      return 'Datos invalidos';
+    }
   }
 
   @HttpCode(HttpStatus.OK)
   @Put(':id')
   updateUserById(@Param('id') id: string, @Body() updateProduct: Product) {
-    return this.productsService.updateProductById(id, updateProduct);
+    if (validateProduct(updateProduct)) {
+      return this.productsService.updateProductById(id, updateProduct);
+    } else {
+      return 'Datos invalidos';
+    }
   }
 
   @HttpCode(HttpStatus.OK)

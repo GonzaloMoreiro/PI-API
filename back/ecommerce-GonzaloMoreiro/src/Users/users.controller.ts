@@ -13,6 +13,7 @@ import {
 
 import { UsersService } from './users.service';
 import { User } from './user.entity';
+import { validateUser } from 'src/utils/validate';
 
 @Controller('users')
 export class UsersController {
@@ -21,7 +22,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Get()
   getUsers(@Query('limit') limit = 5, @Query('page') page = 1) {
-    return this.usersService.getUsers();
+    return this.usersService.getUsers(page, limit);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -33,13 +34,21 @@ export class UsersController {
   @HttpCode(HttpStatus.CREATED)
   @Post()
   createUser(@Body() newUser: User) {
-    return this.usersService.createUser(newUser);
+    if (validateUser(newUser)) {
+      return this.usersService.createUser(newUser);
+    } else {
+      return 'Usuario no valido';
+    }
   }
 
   @HttpCode(HttpStatus.OK)
   @Put(':id')
   updateUserById(@Param('id') id: string, @Body() updateUser: User) {
-    return this.usersService.updateUserById(id, updateUser);
+    if (validateUser(updateUser)) {
+      return this.usersService.updateUserById(id, updateUser);
+    } else {
+      return 'Usuario no valido';
+    }
   }
 
   @HttpCode(HttpStatus.OK)

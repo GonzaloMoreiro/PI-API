@@ -6,8 +6,9 @@ import { User } from './user.entity';
 export class UsersService {
   constructor(private usersRepository: UsersRepository) {}
 
-  getUsers(): Omit<User, 'password'>[] {
-    return this.usersRepository.getUsers().map(({ password, ...rest }) => rest);
+  getUsers(page: number, limit: number): Omit<User, 'password'>[] {
+    const allUsers = this.usersRepository.getUsers(page, limit);
+    return allUsers.map(({ password, ...rest }) => rest);
   }
 
   getUserById(id: string): Omit<User, 'password'> | undefined {

@@ -38,8 +38,9 @@ export class ProductsRepository {
     },
   ];
 
-  getProducts() {
-    return this.products;
+  getProducts(page: number = 1, limit: number = 5): Product[] {
+    const startIndex = (page - 1) * limit;
+    return this.products.slice(startIndex, startIndex + limit);
   }
 
   getById(id: string) {
