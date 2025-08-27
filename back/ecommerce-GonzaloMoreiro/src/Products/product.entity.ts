@@ -1,10 +1,29 @@
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { v4 as uuid } from 'uuid';
+
+@Entity({
+  name: 'products',
+})
 export class Product {
-  constructor(
-    public id: string,
-    public name: string,
-    public description: string,
-    public price: number,
-    public stock: boolean,
-    public imgUrl: string,
-  ) {}
+  @PrimaryGeneratedColumn('uuid')
+  id: string = uuid();
+
+  @Column({ type: 'varchar', length: 50, nullable: false })
+  name: string;
+
+  @Column({ type: 'text', nullable: false })
+  description: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
+  price: number;
+
+  @Column({ type: 'number', nullable: false })
+  stock: boolean;
+
+  @Column({
+    type: 'varchar',
+    default:
+      'https://www.mountaingoatsoftware.com/uploads/blog/2016-09-06-what-is-a-product.png',
+  })
+  imgUrl: string;
 }
