@@ -1,35 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UsersRepository } from './users.repositoy';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
+import { CreateUserDto } from './dtos/createUser.dto';
+import { GetUserDto } from './dtos/getUser.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private usersRepository: UsersRepository) {}
 
-  getUsers(page: number, limit: number): Omit<User, 'password'>[] {
-    const allUsers = this.usersRepository.getUsers(page, limit);
-    return allUsers.map(({ password, ...rest }) => rest);
+  async getUsers(page: number, limit: number): Promise<Partial<GetUserDto>[]> {
+    const allUsers = await this.usersRepository.getUsers(page, limit);
+    return allUsers.map(({ password, isAdmin, ...rest }) => rest);
   }
 
-  getUserById(id: string): Omit<User, 'password'> | undefined {
-    const userFound = this.usersRepository.getById(id);
-    if (userFound) {
-      const { password, ...rest } = userFound;
-      return rest;
-    } else {
-      return undefined;
-    }
+  async getUserById(id: string): Promise<Partial<GetUserDto> | null> {
+    const userFound = await this.usersRepository.getById(id);
+    if (!userFound) throw new NotFoundException('Usuario no encontrado');
+    const { password, isAdmin, ...rest } = userFound;
+    return rest;
   }
 
-  createUser(newUser: User): string {
-    return this.usersRepository.createUser(newUser);
+  async updateUserById(id: string, updateUser): Promise<string | null> {
+    const userUpdate = await this.usersRepository.updateById(id, updateUser);
+    if (!userUpdate) throw new NotFoundException('Error al actualizar usuario');
+    return `Usuario ${userUpdate} actualizado con exito`;
   }
 
-  updateUserById(id: string, updateUser): string | undefined {
-    return this.usersRepository.updateById(id, updateUser);
-  }
-
-  deleteUserById(id: string): string {
-    return this.usersRepository.deleteById(id);
+  async deleteUserById(id: string): Promise<string | null> {
+    const user = await this.usersRepository.deleteById(id);
+    if (!user) throw new NotFoundException('El usuario no existe');
+    return `El usuario ${user} a sido eliminado con exito`;
   }
 }

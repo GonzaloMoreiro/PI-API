@@ -1,15 +1,21 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { LoginUserDto } from './dtos/loginUser.dto';
+import { CreateUserDto } from 'src/Users/dtos/createUser.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('sigin')
-  signIn(@Body('email') email: string, @Body('password') password: string) {
-    if (!email || !password) {
-      return 'Email y password son necesarios';
-    }
+  @HttpCode(HttpStatus.CREATED)
+  @Post('signup')
+  signUp(@Body() data: CreateUserDto) {
+    return this.authService.signUp(data);
+  }
+
+  @Post('signin')
+  signIn(@Body() credentials: LoginUserDto) {
+    const { email, password } = credentials;
     return this.authService.signIn(email, password);
   }
 }

@@ -1,4 +1,15 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Category } from 'src/Categories/entities/category.entity';
+import { OrderDetail } from 'src/OrderDetails/entities/orderDetail.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { v4 as uuid } from 'uuid';
 
 @Entity({
@@ -17,8 +28,8 @@ export class Product {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
   price: number;
 
-  @Column({ type: 'number', nullable: false })
-  stock: boolean;
+  @Column({ type: 'int', nullable: false })
+  stock: number;
 
   @Column({
     type: 'varchar',
@@ -26,4 +37,11 @@ export class Product {
       'https://www.mountaingoatsoftware.com/uploads/blog/2016-09-06-what-is-a-product.png',
   })
   imgUrl: string;
+
+  @ManyToMany(() => OrderDetail)
+  orderDetails: OrderDetail[];
+
+  @ManyToOne(() => Category, (category) => category.product)
+  @JoinColumn({ name: 'category' })
+  category: Category;
 }

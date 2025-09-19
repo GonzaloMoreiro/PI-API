@@ -1,91 +1,52 @@
 import { Injectable } from '@nestjs/common';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersRepository {
-  private users: User[] = [
-    {
-      id: '1',
-      email: 'gonzalo@gmail.com',
-      name: 'Gonzalo',
-      password: '3123124123fas',
-      address: 'Peron 689',
-      phone: '546667123',
-      country: 'Argentina',
-      city: 'Rufino',
-    },
-    {
-      id: '2',
-      email: 'mario@gmail.com',
-      name: 'Mario',
-      password: 'gasdasdasd',
-      address: 'Siempre Viva 123',
-      phone: '546667123',
-      country: 'España',
-      city: 'Ibiza',
-    },
-    {
-      id: '3',
-      email: 'hector@gmail.com',
-      name: 'Hector',
-      password: 'sdgsdbsdbsf',
-      address: 'Puito 9876',
-      phone: '546667123',
-      country: 'Brazil',
-      city: 'Brasilia',
-    },
-    {
-      id: '4',
-      email: 'nanci@gmail.com',
-      name: 'Nanci',
-      password: '4123124',
-      address: 'Estrada 5412',
-      phone: '546667123',
-      country: 'Mexico',
-      city: 'Cancun',
-    },
-  ];
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
 
-  getUsers(page: number = 1, limit: number = 5): User[] {
+  async getUsers(page: number = 1, limit: number = 5): Promise<User[]> {
     const startIndex = (page - 1) * limit;
-    return this.users.slice(startIndex, startIndex + limit);
+    let users = await this.usersRepository.find();
+    users = users.slice(startIndex, startIndex + limit);
+    return users;
   }
 
-  getById(id: string): User | undefined {
-    const userFound = this.users.find((users) => users.id === id);
+  async getById(id: string): Promise<User | null> {
+    const userFound = await this.usersRepository.findOne({
+      where: { id },
+      relations: { orders: true },
+    });
     return userFound;
   }
 
-  getByEmail(email: string): User | undefined {
-    const userFound = this.users.find((users) => users.email === email);
+  async getByEmail(email: string): Promise<User | null> {
+    const userFound = await this.usersRepository.findOne({ where: { email } });
     return userFound;
   }
 
-  createUser(newUser: User): string {
-    const id = this.users.length + 1;
-    newUser.id = id.toString();
-    this.users.push(newUser);
-    return `Usuario ${newUser.id} creado correctamente`;
+  async saveUser(data): Promise<string | null> {
+    await this.usersRepository.save(data);
+    return data.id;
   }
 
-  updateById(id: string, user: Omit<User, 'id'>): string | undefined {
-    const userFind = this.users.find((users) => users.id === id);
-    if (userFind) {
-      userFind.address = user.address;
-      userFind.city = user.city;
-      userFind.country = user.country;
-      userFind.email = user.email;
-      userFind.name = user.name;
-      userFind.password = user.password;
-      userFind.phone = user.phone;
-    } else {
-      return undefined;
-    }
-    return `Usuario ${userFind.id} actualizado correctamente`;
+  async updateById(id: string, user: Omit<User, 'id'>): Promise<string | null> {
+    const userFind = await this.usersRepository.findOne({ where: { id } });
+    if (!userFind) return null;
+    this.usersRepository.merge(userFind, user);
+    await this.usersRepository.save(userFind);
+    return id;
   }
 
-  deleteById(id: string): string {
-    this.users = this.users.filter((users) => users.id !== id);
-    return `Usuario ${id} eliminado correctamente`;
+  async deleteById(id: string): Promise<string | null> {
+    const userFound = await this.usersRepository.findOne({ where: { id } });
+    if (!userFound) return null;
+    await this.usersRepository.delete(id);
+    return id;
   }
 }

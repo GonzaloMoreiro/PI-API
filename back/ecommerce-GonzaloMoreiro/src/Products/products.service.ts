@@ -1,28 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
-import { Product } from './product.entity';
+import { Product } from './entities/product.entity';
 
 @Injectable()
 export class ProductsService {
   constructor(private productsRepository: ProductsRepository) {}
 
-  getProducts(page: number, limit: number): Product[] {
-    return this.productsRepository.getProducts(page, limit);
+  async getProducts(page: number, limit: number): Promise<Product[]> {
+    return await this.productsRepository.getProducts(page, limit);
   }
 
-  getProductById(id: string): Product | undefined {
-    return this.productsRepository.getById(id);
+  async addProducts() {
+    return await this.productsRepository.addProducts();
   }
 
-  createProduct(newProduct: Product): string {
-    return this.productsRepository.createProduct(newProduct);
+  async getProductById(id: string): Promise<Product | null> {
+    const productFind = await this.productsRepository.getById(id);
+    if (!productFind) throw new NotFoundException('Producto no encontrado');
+    return productFind;
   }
 
-  updateProductById(id: string, updateProduct: Product): string | undefined {
-    return this.productsRepository.updateById(id, updateProduct);
+  async createProduct(newProduct: Product): Promise<string | null> {
+    const product = await this.productsRepository.createProduct(newProduct);
+    if (!product) throw new NotFoundException('Problemas al guardas producto');
+    return `Producto ${product} guardado con exito`;
   }
 
-  deleteProductById(id: string): string {
-    return this.productsRepository.deleteById(id);
+  async updateProductById(id: string, updateUser): Promise<string | null> {
+    const productUpdate = await this.productsRepository.updateById(
+      id,
+      updateUser,
+    );
+    if (!productUpdate)
+      throw new NotFoundException('Error al actualizar producto');
+    return `Usuario ${productUpdate} actualizado con exito`;
+  }
+
+  async deleteProductById(id: string): Promise<string | null> {
+    const product = await this.productsRepository.deleteById(id);
+    if (!product) throw new NotFoundException('El producto no existe');
+    return `El producto ${product} a sido eliminado con exito`;
   }
 }

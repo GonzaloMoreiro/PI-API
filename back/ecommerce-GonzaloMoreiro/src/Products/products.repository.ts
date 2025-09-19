@@ -1,74 +1,87 @@
 import { Injectable } from '@nestjs/common';
-import { Product } from './product.entity';
+import { Product } from './entities/product.entity';
+import { Category } from 'src/Categories/entities/category.entity';
+import data from '../utils/seeder.json';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class ProductsRepository {
-  private products: Product[] = [
-    {
-      id: '1',
-      name: 'Licuadora',
-      description: '220v, 1000W',
-      price: 500,
-      stock: true,
-      imgUrl: 'ffasdasd',
-    },
-    {
-      id: '2',
-      name: 'TV',
-      description: 'Full HD 4k',
-      price: 300,
-      stock: true,
-      imgUrl: 'fasfdasasd',
-    },
-    {
-      id: '3',
-      name: 'Placard',
-      description: 'Tamano 200cmx150cmx70cm',
-      price: 400,
-      stock: true,
-      imgUrl: 'gasdasd',
-    },
-    {
-      id: '4',
-      name: 'Mochila',
-      description: 'Capacidad 20 Litros',
-      price: 50,
-      stock: true,
-      imgUrl: 'fasfasf',
-    },
-  ];
+  constructor(
+    @InjectRepository(Product)
+    private productsRepository: Repository<Product>,
+    @InjectRepository(Category)
+    private categoriesRepository: Repository<Category>,
+  ) {}
 
-  getProducts(page: number = 1, limit: number = 5): Product[] {
+  async getProducts(page: number = 1, limit: number = 5): Promise<Product[]> {
     const startIndex = (page - 1) * limit;
-    return this.products.slice(startIndex, startIndex + limit);
+    const products = await this.productsRepository.find({
+      relations: ['category'],
+    });
+    return products.slice(startIndex, startIndex + limit);
   }
 
-  getById(id: string) {
-    return this.products.find((product) => product.id === id);
+  async getById(id: string): Promise<Product | null> {
+    const productFind = await this.productsRepository.findOne({
+      where: { id },
+    });
+    return productFind;
   }
 
-  createProduct(newProduct: Product): string {
-    const id = this.products.length + 1;
-    newProduct.id = id.toString();
-    this.products.push(newProduct);
-    return `Producto ${newProduct.id} creado correctamente`;
-  }
+  async addProducts() {
+    const categories = await this.categoriesRepository.find();
+    const products = await this.productsRepository.find();
 
-  updateById(id: string, updateProduct: Product): string | undefined {
-    const productFind = this.products.find((products) => products.id === id);
-    if (productFind) {
-      productFind.description = updateProduct.description;
-      productFind.imgUrl = updateProduct.imgUrl;
-      productFind.name = updateProduct.name;
-      productFind.price = updateProduct.price;
-      productFind.stock = updateProduct.stock;
-      return `Producto ${id} actualizado correctamente`;
+    for (const element of data) {
+      const productExist = products.find(
+        (products) => products.name === element.name,
+      );
+
+      const relatedCategory = categories.find(
+        (category) => category.name === element.category,
+      );
+
+      if (!productExist) {
+        await this.productsRepository
+          .createQueryBuilder()
+          .insert()
+          .into(Product)
+          .values({
+            name: element.name,
+            description: element.description,
+            price: element.price,
+            stock: element.stock,
+            category: relatedCategory,
+          })
+          .execute();
+      }
     }
-    return undefined;
+    return 'Productos agregados';
   }
 
-  deleteById(id: string) {
-    this.products = this.products.filter((products) => products.id !== id);
-    return `Producto ${id} eliminado correctamente`;
+  async createProduct(data: Product): Promise<string | null> {
+    const newProduct = this.productsRepository.create(data);
+    await this.productsRepository.save(newProduct);
+    return newProduct.id;
+  }
+
+  async updateById(id: string, updatedProduct): Promise<string | null> {
+    const productFind = await this.productsRepository.findOne({
+      where: { id },
+    });
+    if (!productFind) return null;
+    this.productsRepository.merge(productFind, updatedProduct);
+    await this.productsRepository.save(productFind);
+    return id;
+  }
+
+  async deleteById(id: string): Promise<string | null> {
+    const productFound = await this.productsRepository.findOne({
+      where: { id },
+    });
+    if (!productFound) return null;
+    await this.productsRepository.delete(id);
+    return id;
   }
 }

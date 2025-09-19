@@ -6,32 +6,46 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { Product } from './product.entity';
+import { Product } from './entities/product.entity';
 import { validateProduct } from 'src/utils/validate';
 import { AuthGuard } from 'src/Auth/guards/auth.guard';
+import { RolesGuard } from 'src/Auth/guards/roles.guard';
+import { Roles } from 'src/decorators/roles.decorators';
+import { Role } from 'src/roles/roles.enum';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('products')
-export class ProductsControler {
+export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  getProducts(@Query('limit') limit = 5, @Query('page') page = 1) {
+  getProducts(
+    @Query('limit') limit: number = 5,
+    @Query('page') page: number = 1,
+  ) {
     return this.productsService.getProducts(page, limit);
+  }
+
+  @Get('seeder')
+  async addProducts() {
+    return await this.productsService.addProducts();
   }
 
   @HttpCode(HttpStatus.OK)
   @Get(':id')
-  getProductById(@Param('id') id: string) {
+  getProductById(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.getProductById(id);
   }
 
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(AuthGuard)
   @Post()
@@ -43,10 +57,15 @@ export class ProductsControler {
     }
   }
 
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
   @Put(':id')
-  updateUserById(@Param('id') id: string, @Body() updateProduct: Product) {
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
+  updateUserById(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateProduct: Product,
+  ) {
     if (validateProduct(updateProduct)) {
       return this.productsService.updateProductById(id, updateProduct);
     } else {
@@ -55,9 +74,8 @@ export class ProductsControler {
   }
 
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
   @Delete(':id')
-  deleteUserById(@Param('id') id: string) {
+  deleteUserById(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.deleteProductById(id);
   }
 }

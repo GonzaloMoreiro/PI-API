@@ -1,26 +1,38 @@
 import {
   CanActivate,
   ExecutionContext,
+  Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { JwtService } from '@nestjs/jwt';
 
+@Injectable()
 export class AuthGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  constructor(private readonly jwtService: JwtService) {}
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const authHeader = request.headers.authorization;
+    const token = request.headers['authorization']?.split(' ')[1] ?? '';
 
-    if (!authHeader) {
-      throw new UnauthorizedException('El header de autorizacion no existe');
+    if (!token) {
+      throw new UnauthorizedException('Bearer token not found');
     }
-    const email = authHeader.split(':')[0];
-    const password = authHeader.split(':')[1];
+    try {
+      const secret = process.env.JWT_SECRET;
+      const user = await this.jwtService.verifyAsync(token, { secret });
+      user.exp = new Date(user.exp * 1000);
+      user.iat = new Date(user.exp * 1000);
 
-    if (!email || !password) {
-      throw new UnauthorizedException('Credenciales invalidas');
+      if (user.isAdmin) {
+        user.roles = ['admin'];
+      } else {
+        user.roles = ['user'];
+      }
+
+      request.user = user;
+
+      return true;
+    } catch (err) {
+      throw new UnauthorizedException('invalid token');
     }
-    return true;
   }
 }

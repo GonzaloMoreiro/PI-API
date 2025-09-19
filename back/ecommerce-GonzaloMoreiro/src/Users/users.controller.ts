@@ -6,60 +6,64 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 
 import { UsersService } from './users.service';
-import { User } from './user.entity';
-import { validateUser } from 'src/utils/validate';
+
 import { AuthGuard } from 'src/Auth/guards/auth.guard';
+import { CreateUserDto } from './dtos/createUser.dto';
+import { RolesGuard } from 'src/Auth/guards/roles.guard';
+import { Roles } from 'src/decorators/roles.decorators';
+import { Role } from 'src/roles/roles.enum';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
   @Get()
-  getUsers(@Query('limit') limit = 5, @Query('page') page = 1) {
-    return this.usersService.getUsers(page, limit);
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard)
+  @UseGuards(RolesGuard)
+  async getUsers(
+    @Query('limit') limit: number = 5,
+    @Query('page') page: number = 1,
+  ) {
+    return await this.usersService.getUsers(page, limit);
   }
 
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
   @Get(':id')
-  getUserById(@Param('id') id: string) {
-    return this.usersService.getUserById(id);
-  }
-
-  @HttpCode(HttpStatus.CREATED)
-  @Post()
-  createUser(@Body() newUser: User) {
-    if (validateUser(newUser)) {
-      return this.usersService.createUser(newUser);
-    } else {
-      return 'Usuario no valido';
-    }
-  }
-
-  @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
+  async getUserById(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.usersService.getUserById(id);
+  }
+
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
   @Put(':id')
-  updateUserById(@Param('id') id: string, @Body() updateUser: User) {
-    if (validateUser(updateUser)) {
-      return this.usersService.updateUserById(id, updateUser);
-    } else {
-      return 'Usuario no valido';
-    }
+  @UseGuards(AuthGuard)
+  async updateUserById(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateUser: CreateUserDto,
+  ) {
+    return await this.usersService.updateUserById(id, updateUser);
   }
 
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
   @Delete(':id')
-  deleteUserById(@Param('id') id: string) {
-    return this.usersService.deleteUserById(id);
+  @UseGuards(AuthGuard)
+  async deleteUserById(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.usersService.deleteUserById(id);
   }
 }
