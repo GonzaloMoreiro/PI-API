@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateUserDto } from './dtos/createUser.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -35,7 +36,7 @@ export class UsersRepository {
     return data.id;
   }
 
-  async updateById(id: string, user: Omit<User, 'id'>): Promise<string | null> {
+  async updateById(id: string, user: CreateUserDto): Promise<string | null> {
     const userFind = await this.usersRepository.findOne({ where: { id } });
     if (!userFind) return null;
     this.usersRepository.merge(userFind, user);

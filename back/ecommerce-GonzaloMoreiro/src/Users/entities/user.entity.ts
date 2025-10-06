@@ -36,7 +36,6 @@ export class User {
   city: string;
 
   @Column({
-    type: 'boolean',
     default: false,
   })
   isAdmin: boolean;

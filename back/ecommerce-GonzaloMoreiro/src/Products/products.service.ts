@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
 import { Product } from './entities/product.entity';
+import { CreateProductDto } from './dtos/createProduct.dto';
 
 @Injectable()
 export class ProductsService {
@@ -20,16 +21,19 @@ export class ProductsService {
     return productFind;
   }
 
-  async createProduct(newProduct: Product): Promise<string | null> {
+  async createProduct(newProduct: CreateProductDto): Promise<string | null> {
     const product = await this.productsRepository.createProduct(newProduct);
     if (!product) throw new NotFoundException('Problemas al guardas producto');
     return `Producto ${product} guardado con exito`;
   }
 
-  async updateProductById(id: string, updateUser): Promise<string | null> {
+  async updateProductById(
+    id: string,
+    updateProduct: CreateProductDto,
+  ): Promise<string | null> {
     const productUpdate = await this.productsRepository.updateById(
       id,
-      updateUser,
+      updateProduct,
     );
     if (!productUpdate)
       throw new NotFoundException('Error al actualizar producto');

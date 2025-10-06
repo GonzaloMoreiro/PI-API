@@ -20,6 +20,7 @@ import { RolesGuard } from 'src/Auth/guards/roles.guard';
 import { Roles } from 'src/decorators/roles.decorators';
 import { Role } from 'src/roles/roles.enum';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreateProductDto } from './dtos/createProduct.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -49,7 +50,7 @@ export class ProductsController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(AuthGuard)
   @Post()
-  createProduct(@Body() newProduct: Product) {
+  createProduct(@Body() newProduct: CreateProductDto) {
     if (validateProduct(newProduct)) {
       return this.productsService.createProduct(newProduct);
     } else {
@@ -64,7 +65,7 @@ export class ProductsController {
   @UseGuards(AuthGuard, RolesGuard)
   updateUserById(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateProduct: Product,
+    @Body() updateProduct: CreateProductDto,
   ) {
     if (validateProduct(updateProduct)) {
       return this.productsService.updateProductById(id, updateProduct);

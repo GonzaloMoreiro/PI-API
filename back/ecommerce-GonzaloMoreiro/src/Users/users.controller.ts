@@ -15,7 +15,6 @@ import {
 } from '@nestjs/common';
 
 import { UsersService } from './users.service';
-
 import { AuthGuard } from 'src/Auth/guards/auth.guard';
 import { CreateUserDto } from './dtos/createUser.dto';
 import { RolesGuard } from 'src/Auth/guards/roles.guard';
@@ -31,8 +30,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Get()
   @Roles(Role.Admin)
-  @UseGuards(AuthGuard)
-  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   async getUsers(
     @Query('limit') limit: number = 5,
     @Query('page') page: number = 1,

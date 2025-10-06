@@ -6,6 +6,8 @@ import {
   IsUrl,
 } from 'class-validator';
 
+import { Category } from 'src/Categories/entities/category.entity';
+
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
@@ -28,4 +30,6 @@ export class CreateProductDto {
   @IsString()
   @IsUrl()
   imgUrl: string;
+
+  category: Category;
 }

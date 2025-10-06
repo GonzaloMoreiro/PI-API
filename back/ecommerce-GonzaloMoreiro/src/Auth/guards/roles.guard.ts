@@ -12,9 +12,7 @@ import { Role } from 'src/roles/roles.enum';
 export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>('roles', [
       context.getHandler(),
       context.getClass(),
@@ -22,12 +20,10 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const hasRole = () =>
-      requiredRoles.some((role) => user?.role?.includes(role));
+      requiredRoles.some((role) => user?.roles?.includes(role));
     const valid = user && user.roles && hasRole();
     if (!valid) {
-      throw new ForbiddenException(
-        'You do not have permission and are not allowed to access to this rute ',
-      );
+      throw new ForbiddenException('Only admins can access this route ');
     }
     return valid;
   }

@@ -8,6 +8,7 @@ import { UsersRepository } from 'src/Users/users.repositoy';
 import * as bcrypt from 'bcrypt';
 import { GetUserDto } from 'src/Users/dtos/getUser.dto';
 import { JwtService } from '@nestjs/jwt';
+import { Role } from 'src/roles/roles.enum';
 
 @Injectable()
 export class AuthService {
@@ -44,6 +45,7 @@ export class AuthService {
       sub: user.id,
       id: user.id,
       email: user.email,
+      roles: [user.isAdmin ? Role.Admin : Role.User],
     };
 
     const token = this.jwtService.sign(userPayload);

@@ -4,6 +4,7 @@ import { Category } from 'src/Categories/entities/category.entity';
 import data from '../utils/seeder.json';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateProductDto } from './dtos/createProduct.dto';
 
 @Injectable()
 export class ProductsRepository {
@@ -60,7 +61,7 @@ export class ProductsRepository {
     return 'Productos agregados';
   }
 
-  async createProduct(data: Product): Promise<string | null> {
+  async createProduct(data: CreateProductDto): Promise<string | null> {
     const newProduct = this.productsRepository.create(data);
     await this.productsRepository.save(newProduct);
     return newProduct.id;

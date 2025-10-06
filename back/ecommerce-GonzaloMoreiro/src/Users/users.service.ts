@@ -1,6 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UsersRepository } from './users.repositoy';
 import { GetUserDto } from './dtos/getUser.dto';
+import { CreateUserDto } from './dtos/createUser.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -18,8 +24,25 @@ export class UsersService {
     return rest;
   }
 
-  async updateUserById(id: string, updateUser): Promise<string | null> {
-    const userUpdate = await this.usersRepository.updateById(id, updateUser);
+  async updateUserById(
+    id: string,
+    updateUser: CreateUserDto,
+  ): Promise<string | null> {
+    const user = await this.usersRepository.getByEmail(updateUser.email);
+    if (user) throw new NotFoundException('Email ya registrado');
+
+    if (updateUser.password !== updateUser.confirmPassword) {
+      throw new BadRequestException('The Passwords dont match');
+    }
+
+    const hashPass = await bcrypt.hash(updateUser.password, 10);
+    if (!hashPass) {
+      throw new BadRequestException('password could not de hashed');
+    }
+    const userUpdate = await this.usersRepository.updateById(id, {
+      ...updateUser,
+      password: hashPass,
+    });
     if (!userUpdate) throw new NotFoundException('Error al actualizar usuario');
     return `Usuario ${userUpdate} actualizado con exito`;
   }

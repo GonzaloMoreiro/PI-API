@@ -11,15 +11,22 @@ import {
   Min,
   Max,
   IsEmpty,
+  min,
 } from 'class-validator';
 
 export class CreateUserDto {
+  /**
+   * @example Gonzalo
+   */
   @IsString()
   @MinLength(3)
   @MaxLength(80)
   @IsNotEmpty()
   name: string;
 
+  /**
+   * @example gonzalo@gmail.com
+   */
   @IsString()
   @IsEmail()
   @IsNotEmpty()
@@ -28,6 +35,7 @@ export class CreateUserDto {
   /**
    * @example Strong!Pass23
    */
+  @MinLength(8)
   @IsString()
   @MaxLength(15)
   @IsStrongPassword({
@@ -48,7 +56,7 @@ export class CreateUserDto {
   /**
    * @example Strong!Pass23
    */
-
+  @MinLength(8)
   @IsString()
   @MaxLength(15)
   @IsStrongPassword({
@@ -65,6 +73,9 @@ export class CreateUserDto {
   })
   @IsNotEmpty()
   confirmPassword: string;
+  /**
+   * @example 543382674321
+   */
 
   @IsNumber()
   @IsNotEmpty()
@@ -73,21 +84,30 @@ export class CreateUserDto {
   @Max(999999999999999)
   phone: number;
 
+  /**
+   * @example Argentina
+   */
   @IsString()
   @MinLength(5)
   @MaxLength(20)
   country: string;
 
+  /**
+   * @example Santa Rosa 790
+   */
   @IsString()
   @MinLength(3)
   @MaxLength(80)
   address: string;
 
+  /**
+   * @example Rufino
+   */
   @IsString()
   @MinLength(5)
   @MaxLength(20)
   city: string;
 
   @IsEmpty()
-  isAdmin?: boolean;
+  isAdmin: boolean;
 }
