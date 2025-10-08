@@ -37,7 +37,7 @@ export class ProductsService {
     );
     if (!productUpdate)
       throw new NotFoundException('Error al actualizar producto');
-    return `Usuario ${productUpdate} actualizado con exito`;
+    return `Producto ${productUpdate} actualizado con exito`;
   }
 
   async deleteProductById(id: string): Promise<string | null> {

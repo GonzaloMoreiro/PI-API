@@ -5,7 +5,12 @@ import {
   IsUUID,
   MinLength,
 } from 'class-validator';
-import { Product } from 'src/Products/entities/product.entity';
+
+export class ProductId {
+  @IsUUID()
+  @IsNotEmpty()
+  id: string;
+}
 
 export class CreateOrderDto {
   @IsUUID()
@@ -14,5 +19,5 @@ export class CreateOrderDto {
 
   @IsArray()
   @ArrayMinSize(1)
-  products: Partial<Product>[];
+  products: ProductId[];
 }

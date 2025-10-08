@@ -42,6 +42,6 @@ export class Product {
   orderDetails: OrderDetail[];
 
   @ManyToOne(() => Category, (category) => category.product)
-  @JoinColumn({ name: 'category' })
+  @JoinColumn({ name: 'categoryId' })
   category: Category;
 }

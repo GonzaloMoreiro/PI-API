@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Product } from './entities/product.entity';
 import { Category } from 'src/Categories/entities/category.entity';
 import data from '../utils/seeder.json';
@@ -62,7 +62,11 @@ export class ProductsRepository {
   }
 
   async createProduct(data: CreateProductDto): Promise<string | null> {
-    const newProduct = this.productsRepository.create(data);
+    const category = await this.categoriesRepository.findOneBy({
+      id: data.categoryId,
+    });
+    if (!category) throw new NotFoundException('Category not found');
+    const newProduct = this.productsRepository.create({ ...data, category });
     await this.productsRepository.save(newProduct);
     return newProduct.id;
   }

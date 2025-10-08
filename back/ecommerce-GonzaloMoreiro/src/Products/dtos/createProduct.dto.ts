@@ -4,9 +4,8 @@ import {
   IsPositive,
   IsString,
   IsUrl,
+  IsUUID,
 } from 'class-validator';
-
-import { Category } from 'src/Categories/entities/category.entity';
 
 export class CreateProductDto {
   @IsString()
@@ -31,5 +30,7 @@ export class CreateProductDto {
   @IsUrl()
   imgUrl: string;
 
-  category: Category;
+  @IsUUID()
+  @IsNotEmpty()
+  categoryId: string;
 }
