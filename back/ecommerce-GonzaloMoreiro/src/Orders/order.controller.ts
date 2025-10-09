@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Param,
   ParseUUIDPipe,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CreateOrderDto } from './dtos/createOrder.dto';
@@ -19,8 +21,13 @@ export class OrdersController {
   @ApiBearerAuth()
   @Post()
   @UseGuards(AuthGuard)
-  async addOrder(@Body() newOrder: CreateOrderDto) {
-    return await this.ordersService.addOrder(newOrder);
+  async addOrder(@Req() req, @Body() newOrder: CreateOrderDto) {
+    const { userId, products } = newOrder;
+    const tokenUserId = req.user.id;
+    if (userId !== tokenUserId) {
+      throw new ForbiddenException('No podés crear órdenes para otro usuario');
+    }
+    return await this.ordersService.addOrder(userId, products);
   }
 
   @ApiBearerAuth()

@@ -6,9 +6,7 @@ import { OrdersRepository } from './order.repository';
 export class OrdersService {
   constructor(private readonly ordersRepository: OrdersRepository) {}
 
-  async addOrder(dto: CreateOrderDto) {
-    const { userId, products } = dto;
-
+  async addOrder(userId: string, products) {
     return await this.ordersRepository.addOrder(userId, products);
   }
 

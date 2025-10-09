@@ -25,17 +25,15 @@ export class OrdersRepository {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
+
   async addOrder(userId: string, products: { id: string }[]) {
-    // 1️⃣ Buscar usuario
     const user = await this.usersRepository.findOneBy({ id: userId });
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    // 2️⃣ Obtener IDs de los productos
     const productIds = products.map((p) => p.id);
 
-    // 3️⃣ Traer productos de la DB que existan y tengan stock
     const dbProducts = await this.productsRepository.findBy({
       id: In(productIds),
     });
@@ -47,7 +45,6 @@ export class OrdersRepository {
       );
     }
 
-    // 4️⃣ Calcular total y actualizar stock
     let totalPrice = 0;
     for (const product of validProducts) {
       totalPrice += Number(product.price);
@@ -55,32 +52,17 @@ export class OrdersRepository {
     }
     await this.productsRepository.save(validProducts);
 
-    // 5️⃣ Crear la orden
     const order = this.ordersRepository.create({ date: new Date(), user });
     const savedOrder = await this.ordersRepository.save(order);
 
-    // 6️⃣ Crear el orderDetail sin depender de `create()`
-    const orderDetailResult = await this.orderDetailsRepository
-      .createQueryBuilder()
-      .insert()
-      .into(OrderDetail)
-      .values({
-        price: Number(totalPrice.toFixed(2)),
-        order: savedOrder,
-      })
-      .returning('*')
-      .execute();
+    const orderDetail = this.orderDetailsRepository.create({
+      price: Number(totalPrice.toFixed(2)),
+      order: savedOrder,
+      products: validProducts,
+    });
+    const savedOrderDetail =
+      await this.orderDetailsRepository.save(orderDetail);
 
-    const savedOrderDetail = orderDetailResult.generatedMaps[0] as OrderDetail;
-
-    // 7️⃣ Insertar la relación ManyToMany con productos
-    await this.orderDetailsRepository
-      .createQueryBuilder()
-      .relation(OrderDetail, 'products')
-      .of(savedOrderDetail.id)
-      .add(validProducts.map((p) => p.id));
-
-    // 8️⃣ Devolver resultado
     return {
       orderId: savedOrder.id,
       orderDetail: {
@@ -94,65 +76,6 @@ export class OrdersRepository {
       },
     };
   }
-  // async addOrder(userId: string, products: Partial<Product>[]) {
-  //   const user = await this.usersRepository.findOneBy({ id: userId });
-
-  //   if (!user) {
-  //     return 'Usuario no encontrado';
-  //   }
-
-  //   const productIds = products.map((p) => p.id);
-
-  //   const dbProducts = await this.productsRepository.findBy({
-  //     id: In(productIds),
-  //   });
-
-  //   const validProducts = dbProducts.filter((p) => p.stock > 0);
-
-  //   if (validProducts.length !== products.length) {
-  //     return 'Uno o mas productos no existen o no tienen stock disponible';
-  //   }
-
-  //   let totalPrice = 0;
-  //   const updatedProducts: Product[] = [];
-
-  //   for (const product of validProducts) {
-  //     totalPrice += Number(product.price);
-
-  //     product.stock -= 1;
-
-  //     updatedProducts.push(product);
-  //   }
-
-  //   await this.productsRepository.save(updatedProducts);
-
-  //   const order = this.ordersRepository.create({
-  //     date: new Date(),
-  //     user,
-  //   });
-
-  //   const savedOrder = await this.ordersRepository.save(order);
-
-  //   const orderDetail = this.orderDetailsRepository.create({
-  //     price: Number(totalPrice.toFixed(2)),
-  //     products: validProducts,
-  //     order: savedOrder,
-  //   });
-
-  //   const savedOrderDetail =
-  //     await this.orderDetailsRepository.save(orderDetail);
-
-  //   savedOrder.orderDetail = savedOrderDetail;
-  //   await this.orderDetailsRepository.save(savedOrder);
-
-  //   return {
-  //     orderId: savedOrder.id,
-  //     orderDetail: {
-  //       id: savedOrderDetail.id,
-  //       price: savedOrderDetail.price,
-  //     },
-  //   };
-  // }
 
   async getOrder(id: string) {
     const orderSearch = await this.ordersRepository.findOne({

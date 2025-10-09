@@ -1,10 +1,4 @@
-import {
-  ArrayMinSize,
-  IsArray,
-  IsNotEmpty,
-  IsUUID,
-  MinLength,
-} from 'class-validator';
+import { ArrayMinSize, IsArray, IsNotEmpty, IsUUID } from 'class-validator';
 
 export class ProductId {
   @IsUUID()
