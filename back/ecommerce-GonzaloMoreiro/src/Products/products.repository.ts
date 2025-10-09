@@ -26,6 +26,9 @@ export class ProductsRepository {
   async getById(id: string): Promise<Product | null> {
     const productFind = await this.productsRepository.findOne({
       where: { id },
+      relations: {
+        category: true,
+      },
     });
     return productFind;
   }
@@ -38,30 +41,28 @@ export class ProductsRepository {
       const productExist = products.find(
         (products) => products.name === element.name,
       );
+      if (productExist) {
+        continue;
+      }
 
       const relatedCategory = categories.find(
         (category) => category.name === element.category,
       );
 
-      if (!productExist) {
-        await this.productsRepository
-          .createQueryBuilder()
-          .insert()
-          .into(Product)
-          .values({
-            name: element.name,
-            description: element.description,
-            price: element.price,
-            stock: element.stock,
-            category: relatedCategory,
-          })
-          .execute();
-      }
+      const newProduct = this.productsRepository.create({
+        name: element.name,
+        description: element.description,
+        price: element.price,
+        stock: element.stock,
+        category: relatedCategory,
+      });
+      await this.productsRepository.save(newProduct);
     }
     return 'Productos agregados';
   }
 
   async createProduct(data: CreateProductDto): Promise<string | null> {
+    if (data.name) throw new NotFoundException('Producto ya existente');
     const category = await this.categoriesRepository.findOneBy({
       id: data.categoryId,
     });
