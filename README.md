@@ -52,6 +52,8 @@ git clone <REPO_URL>
 cd pi-ecommerce
 ```
 
+Backend
+
 ```
 npm install
 npm run start:dev
