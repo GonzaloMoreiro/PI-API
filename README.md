@@ -69,11 +69,11 @@ API backend desarrollada con enfoque full stack, escalable y modular.
 
 ## 📚 Recursos
 
-NestJS Docs
+- [NestJS Docs](https://docs.nestjs.com/)  
 
-TypeORM Docs
+- [TypeORM Docs](https://typeorm.io/)  
 
-Swagger Docs
+- [Swagger Docs](https://swagger.io/docs/)  
 
 ## 📝 Licencia
 
